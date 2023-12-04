@@ -1,0 +1,34 @@
+GET http://localhost:5000/api/user
+
+###
+POST http://localhost:5000/api/user/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "pass": "admin"
+}
+
+###
+POST http://localhost:5000/api/user/auth/register
+Content-Type: application/json
+
+{
+  "username": "admin1",
+  "pass": "admin",
+  "is_admin": true
+}
+
+###
+PUT http://localhost:5000/api/post/2
+Content-Type: application/json
+
+{
+  "title": "post2",
+  "description": "desc2",
+  "author": "author2",
+  "picture": "picture2",
+  "link": "link2"
+}
+###
+GET http://localhost:5000/api/post/2
