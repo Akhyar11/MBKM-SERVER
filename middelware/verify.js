@@ -18,9 +18,9 @@ const verifyToken = (req, res, next) => {
       if (err) return res.status(200).json({ msg: "Harap login dulu" });
       const userId = decode.userId;
       const username = decode.username;
-      const admin = decode.admin;
+      const email = decode.email;
       const user = await User.findAll({
-        where: { id: userId, username, is_admin: admin },
+        where: { id: userId, username, email },
       });
       if (user[0] == undefined)
         return res.status(400).json({ msg: "Token dengan user tidak cocok" });

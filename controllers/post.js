@@ -1,5 +1,6 @@
 const { DataTypes } = require("sequelize");
 const db = require("../utils/db.js");
+const fs = require("fs")
 const PostF = require("../models/post.js");
 
 const Post = PostF(db, DataTypes);
@@ -36,7 +37,7 @@ class PostController {
   }
 
   async add(req, res) {
-    const { title, description, author, picture, link } = req.body;
+    const { title, description, author, link } = req.body;
     try {
       const postCheck = await Post.findAll({
         where: {
@@ -49,11 +50,11 @@ class PostController {
         return res.status(400).json({
           msg: "Postingan telah tersedia, ganti atau gunakan judul lain",
         });
-      const post = await Post.create({
+      await Post.create({
         title,
         description,
         author,
-        picture,
+        picture: "",
         link,
       });
       return res.status(200).json({ msg: "Memebuat postingan berhasil" });
@@ -65,7 +66,7 @@ class PostController {
 
   async update(req, res) {
     const { id } = req.params;
-    const { title, description, author, picture, link } = req.body;
+    const { title, description, author, link } = req.body;
     try {
       const postCheck = await Post.findAll({ where: { id } });
 
@@ -73,12 +74,11 @@ class PostController {
         return res.status(400).json({
           msg: "Postingan tidak tersedia",
         });
-      const post = await Post.update(
+      await Post.update(
         {
           title,
           description,
           author,
-          picture,
           link,
         },
         { where: { id } }
@@ -94,10 +94,12 @@ class PostController {
     const { id } = req.params;
     try {
       const post = await Post.findAll({ where: { id } });
-      if (post[0] != undefined)
+      if (post[0] === undefined)
         return res
           .status(400)
           .json({ msg: "Menghapus gagal, Postingan tidak tersedia" });
+      const path = post[0].picture;
+      fs.unlinkSync("." + path);
       Post.destroy({ where: { id } });
       return res.status(200).json({ msg: "Menghapus berhasil" });
     } catch (err) {

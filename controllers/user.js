@@ -11,6 +11,8 @@ dotenv.config();
 class UserController {
   async login(req, res) {
     const { username, pass } = req.body;
+    console.clear()
+    console.log({username, pass})
     try {
       const user = await User.findAll({
         where: {
@@ -19,31 +21,20 @@ class UserController {
       });
 
       if (user[0] == undefined)
-        return res.status(400).json({ mag: "Username tidak tersedia" });
+        return res.status(400).json({ msg: "Username tidak tersedia" });
       const confPass = await bcryptjs.compare(pass, user[0].pass);
       if (!confPass) return res.status(400).json({ msg: "Password salah" });
       const userId = user[0].id;
-      const admin = user[0].is_admin;
-
-      const accessToken = jwt.sign(
-        { userId, username, admin },
-        process.env.ACCSESS_TOKEN_SECRET,
-        { expiresIn: "20s" },
-      );
+      const email = user[0].email;
       const refreshToken = jwt.sign(
-        { userId, username, admin },
+        { userId, username, email },
         process.env.REFRESH_TOKEN_SECRET,
         { expiresIn: "5m" },
       );
 
       await User.update({ token: refreshToken }, { where: { id: userId } });
 
-      res.cookie("token", refreshToken, {
-        httpOnly: true,
-        maxAge: 10 * 60 * 1000,
-      });
-
-      return res.status(200).json({ accessToken });
+      return res.status(200).json({ refreshToken });
     } catch (err) {
       console.log(err);
       res.status(400);
@@ -51,7 +42,7 @@ class UserController {
   }
 
   async register(req, res) {
-    const { username, pass, is_admin } = req.body;
+    const { username, pass, email } = req.body;
     try {
       const user = await User.findAll({
         where: {
@@ -67,7 +58,7 @@ class UserController {
       const salt = await bcryptjs.genSalt();
       const bcryptOfPass = await bcryptjs.hash(pass, salt);
 
-      await User.create({ username, pass: bcryptOfPass, is_admin, token: "" });
+      await User.create({ username, pass: bcryptOfPass, email, token: "" });
       return res.status(200).json({ msg: "User berhasil dibuat" });
     } catch (err) {
       console.log(err);
@@ -77,22 +68,22 @@ class UserController {
 
   token(req, res) {
     try {
-      const { token } = req.cookies;
+      const { token } = req.body;
       jwt.verify(
         token,
         process.env.REFRESH_TOKEN_SECRET,
         async (err, decode) => {
-          if (err) return res.status(200).json({ msg: "Harap login dulu" });
+          if (err) return res.status(400).json({ msg: "Harap login dulu" });
           const userId = decode.userId;
           const username = decode.username;
-          const admin = decode.admin;
+          const email = decode.email;
           const user = await User.findAll({ where: { id: userId } });
           if (user[0] == undefined)
             return res
               .status(400)
               .json({ msg: "Token dengan user tidak cocok" });
           const accessToken = jwt.sign(
-            { userId, username, admin },
+            { userId, username, email },
             process.env.ACCSESS_TOKEN_SECRET,
             { expiresIn: "20s" },
           );

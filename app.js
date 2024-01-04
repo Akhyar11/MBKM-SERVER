@@ -5,6 +5,9 @@ const path = require("path");
 const db = require("./utils/db.js");
 const Auth = require("./routers/auth.js");
 const Post = require("./routers/post.js");
+const Penduduk = require("./routers/penduduk.js");
+const Kegiatan = require("./routers/kegitan.js");
+const Detail = require("./routers/detail.js");
 
 class App {
   constructor() {
@@ -30,10 +33,20 @@ class App {
 
   #router() {
     // User auth
-    this.app.use("/api/user/auth", Auth);
+    this.app.use("/api/user", Auth);
 
     // Post
     this.app.use("/api/post", Post);
+
+    // Penduduk
+    this.app.use("/api/penduduk", Penduduk);
+
+    // Kegiatan
+    this.app.use("/api/kegiatan", Kegiatan);
+
+    // Detail Desa
+    this.app.use("/api/detail", Detail);
+
   }
 
   async run() {
