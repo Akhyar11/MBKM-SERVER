@@ -8,6 +8,7 @@ const Post = require("./routers/post.js");
 const Penduduk = require("./routers/penduduk.js");
 const Kegiatan = require("./routers/kegitan.js");
 const Detail = require("./routers/detail.js");
+const Pengurus = require("./routers/pengurus.js");
 
 class App {
   constructor() {
@@ -46,6 +47,9 @@ class App {
 
     // Detail Desa
     this.app.use("/api/detail", Detail);
+
+    // Pengurus Desa
+    this.app.use("/api/pengurus", Pengurus)
 
   }
 

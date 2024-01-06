@@ -1,1 +1,6 @@
 /node_modules
+/public/img/detail/*
+/public/img/penduduk/*
+/public/img/kegiatan/*
+/public/img/user/*
+/public/img/pengurus/*

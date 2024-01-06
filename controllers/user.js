@@ -9,32 +9,60 @@ const User = UserF(db, DataTypes);
 dotenv.config();
 
 class UserController {
+  async getById(req, res) {
+    const id = req.params.id;
+    try {
+      const user = await User.findAll({
+        where: {
+          id,
+        },
+        attributes: {
+          username,
+          email,
+          foto,
+        },
+      });
+
+      res.status(200).json({ user });
+    } catch (err) {
+      res.status(400).json({ msg: "Tidak dapat menampilkan data user" });
+    }
+  }
+
   async login(req, res) {
     const { username, pass } = req.body;
-    console.clear()
-    console.log({username, pass})
+    console.clear();
+    console.log({ username, pass });
     try {
       const user = await User.findAll({
         where: {
           username,
         },
+        attributes: ["id", "username", "email"],
+      });
+
+      const user1 = await User.findAll({
+        where: {
+          username,
+        },
+        attributes: ["pass"],
       });
 
       if (user[0] == undefined)
         return res.status(400).json({ msg: "Username tidak tersedia" });
-      const confPass = await bcryptjs.compare(pass, user[0].pass);
+      const confPass = await bcryptjs.compare(pass, user1[0].pass);
       if (!confPass) return res.status(400).json({ msg: "Password salah" });
       const userId = user[0].id;
       const email = user[0].email;
       const refreshToken = jwt.sign(
         { userId, username, email },
         process.env.REFRESH_TOKEN_SECRET,
-        { expiresIn: "5m" },
+        { expiresIn: "5m" }
       );
 
       await User.update({ token: refreshToken }, { where: { id: userId } });
 
-      return res.status(200).json({ refreshToken });
+      return res.status(200).json({ refreshToken, user });
     } catch (err) {
       console.log(err);
       res.status(400);
@@ -58,7 +86,13 @@ class UserController {
       const salt = await bcryptjs.genSalt();
       const bcryptOfPass = await bcryptjs.hash(pass, salt);
 
-      await User.create({ username, pass: bcryptOfPass, email, token: "" });
+      await User.create({
+        username,
+        pass: bcryptOfPass,
+        email,
+        token: "",
+        foto: "",
+      });
       return res.status(200).json({ msg: "User berhasil dibuat" });
     } catch (err) {
       console.log(err);
@@ -85,10 +119,10 @@ class UserController {
           const accessToken = jwt.sign(
             { userId, username, email },
             process.env.ACCSESS_TOKEN_SECRET,
-            { expiresIn: "20s" },
+            { expiresIn: "20s" }
           );
           return res.status(200).json({ accessToken });
-        },
+        }
       );
     } catch (err) {
       console.log(err);
