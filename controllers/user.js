@@ -9,6 +9,18 @@ const User = UserF(db, DataTypes);
 dotenv.config();
 
 class UserController {
+  async all(_, res) {
+    try {
+      const user = await User.findAll({
+        attributes: ["id", "username", "email", "foto"],
+      });
+
+      res.status(200).json({ user });
+    } catch (err) {
+      res.status(400).json({ msg: "tidak ada data user" });
+    }
+  }
+
   async getById(req, res) {
     const id = req.params.id;
     try {
@@ -16,15 +28,12 @@ class UserController {
         where: {
           id,
         },
-        attributes: {
-          username,
-          email,
-          foto,
-        },
+        attributes: ["username", "email", "foto"],
       });
 
       res.status(200).json({ user });
     } catch (err) {
+      console.log({ err });
       res.status(400).json({ msg: "Tidak dapat menampilkan data user" });
     }
   }
@@ -57,7 +66,7 @@ class UserController {
       const refreshToken = jwt.sign(
         { userId, username, email },
         process.env.REFRESH_TOKEN_SECRET,
-        { expiresIn: "5m" }
+        { expiresIn: "5m" },
       );
 
       await User.update({ token: refreshToken }, { where: { id: userId } });
@@ -119,14 +128,14 @@ class UserController {
           const accessToken = jwt.sign(
             { userId, username, email },
             process.env.ACCSESS_TOKEN_SECRET,
-            { expiresIn: "20s" }
+            { expiresIn: "20s" },
           );
           return res.status(200).json({ accessToken });
-        }
+        },
       );
     } catch (err) {
       console.log(err);
-      res.status(400);
+      return res.status(400).json({ msg: "Harap login dulu" });
     }
   }
 

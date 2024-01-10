@@ -15,7 +15,7 @@ const verifyToken = (req, res, next) => {
 
   try {
     jwt.verify(token, process.env.ACCSESS_TOKEN_SECRET, async (err, decode) => {
-      if (err) return res.status(200).json({ msg: "Harap login dulu" });
+      if (err) return res.status(400).json({ msg: "Harap login dulu" });
       const userId = decode.userId;
       const username = decode.username;
       const email = decode.email;

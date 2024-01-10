@@ -22,18 +22,19 @@ class Auth {
 
   useRouters() {
     // User general
+    this.router.get("/", UserController.all);
     this.router.get("/:id", UserController.getById);
     this.router.post("/login", UserController.login);
-    this.router.post("/register", UserController.register);
+    this.router.post("/register", verifyToken, UserController.register);
     this.router.post("/token", UserController.token);
     this.router.delete("/logout", verifyToken, UserController.logout);
 
     // Img Body
     this.router.post(
-      "/img",
+      "/img/:id",
       verifyToken,
       this.uplaod.single("user"),
-      imgControllerUser.add
+      imgControllerUser.add,
     );
   }
 }

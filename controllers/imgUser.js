@@ -7,7 +7,6 @@ const User = UserF(db, DataTypes);
 
 class imgControllerUser {
   async add(req, res) {
-    console.log("hallo");
     const id = req.params.id;
     const path =
       (req.file.destination + req.file.originalname).split(".")[1] +
