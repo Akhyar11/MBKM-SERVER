@@ -26,6 +26,7 @@ class Auth {
     this.router.get("/:id", UserController.getById);
     this.router.post("/login", UserController.login);
     this.router.post("/register", verifyToken, UserController.register);
+    this.router.post("/register/admin", UserController.regiserFristAdmin);
     this.router.post("/token", UserController.token);
     this.router.delete("/logout", verifyToken, UserController.logout);
 

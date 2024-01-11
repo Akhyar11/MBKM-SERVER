@@ -78,6 +78,31 @@ class UserController {
     }
   }
 
+  async regiserFristAdmin(req, res) {
+    const { username, pass, email } = req.body;
+    try {
+      const user = await User.findAll();
+      if (user[0] !== undefined)
+        return res.status(400).json({
+          msg: "Akun admin sudah dibuat, hubungi admin jika ingin membuat akun",
+        });
+
+      const salt = await bcryptjs.genSalt();
+      const bcryptOfPass = await bcryptjs.hash(pass, salt);
+      await User.create({
+        username,
+        pass: bcryptOfPass,
+        email,
+        token: "",
+        foto: "",
+      });
+      return res.status(200).json({ msg: "berhasil membuat akun admin" });
+    } catch (err) {
+      console.log({ err });
+      return res.status(400).json({ msg: "err disisi server" });
+    }
+  }
+
   async register(req, res) {
     const { username, pass, email } = req.body;
     try {
