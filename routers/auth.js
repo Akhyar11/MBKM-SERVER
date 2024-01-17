@@ -27,15 +27,18 @@ class Auth {
     this.router.post("/login", UserController.login);
     this.router.post("/register", verifyToken, UserController.register);
     this.router.post("/register/admin", UserController.regiserFristAdmin);
+    this.router.put("/pass/:id", verifyToken, UserController.updatePass);
+    this.router.patch("/:id", verifyToken, UserController.updateUser);
     this.router.post("/token", UserController.token);
     this.router.delete("/logout", verifyToken, UserController.logout);
+    this.router.delete("/:id", verifyToken, UserController.drop);
 
     // Img Body
     this.router.post(
       "/img/:id",
       verifyToken,
       this.uplaod.single("user"),
-      imgControllerUser.add,
+      imgControllerUser.add
     );
   }
 }

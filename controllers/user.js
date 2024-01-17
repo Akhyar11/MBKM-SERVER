@@ -1,4 +1,5 @@
 const { DataTypes } = require("sequelize");
+const fs = require("fs");
 const db = require("../utils/db.js");
 const bcryptjs = require("bcryptjs");
 const dotenv = require("dotenv");
@@ -66,7 +67,7 @@ class UserController {
       const refreshToken = jwt.sign(
         { userId, username, email },
         process.env.REFRESH_TOKEN_SECRET,
-        { expiresIn: "5m" },
+        { expiresIn: "5m" }
       );
 
       await User.update({ token: refreshToken }, { where: { id: userId } });
@@ -134,6 +135,39 @@ class UserController {
     }
   }
 
+  async updatePass(req, res) {
+    const { passOld, passNew } = req.body;
+    const { id } = req.params;
+    try {
+      const user = await User.findAll({ where: { id } });
+      const confPass = await bcryptjs.compare(passOld, user[0].pass);
+      if (!confPass) return res.status(400).json({ msg: "Password salah" });
+
+      const salt = await bcryptjs.genSalt();
+      const bcryptOfPass = await bcryptjs.hash(passNew, salt);
+
+      await User.update({ pass: bcryptOfPass }, { where: { id } });
+      return res.status(200).json({ msg: "berhasil mengedit password" });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  async updateUser(req, res) {
+    const { username, email } = req.body;
+    const { id } = req.params;
+    try {
+      const user = await User.findAll({ where: { id } });
+
+      if (user[0] === undefined)
+        return res.status(400).json({ msg: "tidak ada data user" });
+      await User.update({ username, email }, { where: { id } });
+      return res.status(200).json({ msg: "berhasil mengedit user" });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   token(req, res) {
     try {
       const { token } = req.body;
@@ -153,10 +187,10 @@ class UserController {
           const accessToken = jwt.sign(
             { userId, username, email },
             process.env.ACCSESS_TOKEN_SECRET,
-            { expiresIn: "20s" },
+            { expiresIn: "20s" }
           );
           return res.status(200).json({ accessToken });
-        },
+        }
       );
     } catch (err) {
       console.log(err);
@@ -169,6 +203,24 @@ class UserController {
       res.clearCookie("token");
       return res.status(200).json({ msg: "berhasil keluar" });
     } catch (err) {
+      return res.status(400);
+    }
+  }
+
+  async drop(req, res) {
+    const { id } = req.params;
+    try {
+      const user = await User.findAll({ where: { id } });
+      if (user[0] === undefined)
+        return res
+          .status(400)
+          .json({ msg: "Menghapus gagal, user tidak tersedia" });
+      const path = user[0].foto;
+      fs.unlinkSync("." + path);
+      await User.destroy({ where: { id } });
+      return res.status(200).json({ msg: "Menghapus berhasil" });
+    } catch (err) {
+      console.log(err);
       return res.status(400);
     }
   }

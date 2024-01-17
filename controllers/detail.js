@@ -1,6 +1,6 @@
 const { DataTypes } = require("sequelize");
 const db = require("../utils/db.js");
-const fs = require("fs")
+const fs = require("fs");
 const DetailF = require("../models/detail_desa.js");
 
 const Detail = DetailF(db, DataTypes);
@@ -41,7 +41,8 @@ class DetailController {
     try {
       const detailCheck = await Detail.findAll({
         where: {
-          kode_pos, name
+          kode_pos,
+          name,
         },
       });
 
@@ -66,7 +67,7 @@ class DetailController {
 
   async update(req, res) {
     const { id } = req.params;
-    const { name, alamat, provensi, kota, kode_pos} = req.body;
+    const { name, alamat, provensi, kota, kode_pos } = req.body;
     try {
       const detailCheck = await Detail.findAll({ where: { id } });
 
@@ -76,7 +77,11 @@ class DetailController {
         });
       await Detail.update(
         {
-          name, alamat, provensi, kota, kode_pos
+          name,
+          alamat,
+          provensi,
+          kota,
+          kode_pos,
         },
         { where: { id } }
       );
@@ -91,7 +96,7 @@ class DetailController {
     const { id } = req.params;
     try {
       const detail = await Detail.findAll({ where: { id } });
-      if (detail[0] != undefined)
+      if (detail[0] === undefined)
         return res
           .status(400)
           .json({ msg: "Menghapus gagal, detail tidak tersedia" });
